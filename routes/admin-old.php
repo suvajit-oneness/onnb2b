@@ -1,6 +1,4 @@
 <?php
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 
 // admin guard
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -85,25 +83,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/{id}/delete', 'Admin\OfferController@destroy')->name('delete');
         });
 
-        // secondary order
+        // order
         Route::prefix('order')->name('order.')->group(function () {
-            Route::get('/secondary', 'Admin\OrderController@index')->name('index');
+            Route::get('/', 'Admin\OrderController@index')->name('index');
+            Route::post('/store', 'Admin\OrderController@store')->name('store');
             Route::get('/{id}/view', 'Admin\OrderController@show')->name('view');
-            //primary order
-            Route::get('/primary', 'Admin\DistributorController@order')->name('primary');
-            Route::get('/{id}/primary/details', 'Admin\DistributorController@orderdetail')->name('details');
-
+            Route::post('/{id}/update', 'Admin\OrderController@update')->name('update');
+            Route::get('/{id}/status/{status}', 'Admin\OrderController@status')->name('status');
         });
-            // primary report
-        Route::prefix('primary')->name('primary.report.')->group(function () {
-                Route::get('/report', 'Admin\SaleController@index')->name('index');
-                Route::get('/detail', 'Admin\SaleController@detail')->name('detail');
-            });
-            // secondary report
-        Route::name('secondary')->name('secondary.report.')->group(function () {
-                Route::get('/report', 'Admin\ReportController@index')->name('index');
-                Route::get('/detail', 'Admin\ReportController@detail')->name('detail');
-            });
+
 
         // transaction
         Route::prefix('transaction')->name('transaction.')->group(function () {
@@ -120,10 +108,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{id}/update', 'Admin\StoreController@update')->name('update');
             Route::get('/{id}/status', 'Admin\StoreController@status')->name('status');
             Route::get('/{id}/delete', 'Admin\StoreController@destroy')->name('delete');
-            Route::get('/no-order-reason', 'Admin\StoreController@noorderreasonshow')->name('noorderreasonview');
+
         });
         //no order
-
+        Route::get('/no-order-reason', 'Admin\StoreController@noorderreasonshow')->name('noorderreasonview');
         // user
         Route::prefix('user')->name('user.')->group(function () {
             Route::get('/', 'Admin\UserController@index')->name('index');
@@ -244,6 +232,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/{id}/status', 'Admin\DistributorController@status')->name('status');
             Route::get('/{id}/verification', 'Admin\DistributorController@verification')->name('verification');
             Route::get('/{id}/delete', 'Admin\DistributorController@destroy')->name('delete');
+            Route::get('/order', 'Admin\DistributorController@order')->name('order.index');
+            Route::get('/{id}/order/details', 'Admin\DistributorController@orderdetail')->name('order.details');
             Route::get('/directory', 'Admin\AdminController@directory')->name('directory');
         });
 
@@ -271,15 +261,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('/{id}', 'Admin\RetailerController@image')->name('index');
                 Route::get('/{id}/{img}/delete', 'Admin\RetailerController@imagedelete')->name('delete');
             });
-
-            // sales
-            Route::prefix('sales')->name('sales.')->group(function () {
-                Route::get('/', 'Admin\SaleController@sale')->name('index');
-            });
-
-
         });
 
+        // sales
+        Route::prefix('sales')->name('sales.')->group(function () {
+            Route::get('/', 'Admin\SaleController@sale')->name('index');
+        });
 
+        // sales report
+        Route::name('sales.report.')->group(function () {
+            Route::get('/sales/report', 'Admin\SaleController@index')->name('index');
+            Route::get('/sales/report/detail', 'Admin\SaleController@detail')->name('detail');
+        });
     });
 });

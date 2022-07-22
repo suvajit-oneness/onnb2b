@@ -15,10 +15,11 @@ use App\Models\Order;
 use App\Models\RetailerListOfOcc;
 use App\User;
 use App\Models\DirectoryMom;
+use App\Models\OrderDistributor;
+use App\Models\OrderProduct;
 use App\Models\Store;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-
 
 class AdminController extends Controller
 {
@@ -26,11 +27,8 @@ class AdminController extends Controller
     {
         $this->distributorRepository = $distributorRepository;
     }
-    /**
-     * This method is for admin login
-     *
-     */
-     public function check(Request $request)
+
+    public function check(Request $request)
     {
         $request->validate([
             'email' => 'required | string | email | exists:admins',
@@ -45,91 +43,32 @@ class AdminController extends Controller
             return redirect()->route('admin.login')->withInputs($request->all())->with('failure', 'Invalid credentials. Try again');
         }
     }
-    /**
-     * This method is for admin dashboard
-     *
-     */
+
     public function home(Request $request)
     {
-        // $data = $userRepository->listAll();
-        // dd($data->count());
         $data = (object)[];
-        $data->users = User::count();
-        $data->collection = Collection::count();
-        $distributor = RetailerListOfOcc::select('distributor_name')->orderBy('distributor_name')->count();
-        $data->retailer = Store::count();
-        $data->products = Product::latest('id')->get();
-        $data->orders = Order::latest('id')->limit(5)->get();
-        $data->state = RetailerListOfOcc::select('state')->groupBy('state')->count();
-        $data->store = Store::count();
-        $activity=Activity::paginate(8);
-        $store=Store::paginate(5);
-        $loggedInUser = DB::table('retailer_list_of_occ')->select('vp')
-        ->groupBy('vp')
-        ->get();
-        //$loggedInUser=$request->vp;
+        $data->vp = RetailerListOfOcc::select('vp')->whereRaw('vp IS NOT null')->groupBy('vp')->get();
+        $data->rsm = RetailerListOfOcc::select('rsm')->whereRaw('rsm IS NOT null')->groupBy('rsm')->get();
+        $data->asm = RetailerListOfOcc::select('asm')->whereRaw('asm IS NOT null')->groupBy('asm')->get();
+        $data->ase = RetailerListOfOcc::select('ase')->whereRaw('ase IS NOT null')->groupBy('ase')->get();
+        $data->distributor = RetailerListOfOcc::select('distributor_name')->whereRaw('distributor_name IS NOT null')->groupBy('distributor_name')->get();
+        $data->store = Store::where('status', 1)->count();
 
-        //dd($loggedInUser);
+        // $data->primary = OrderDistributor::where('created_at', '>', \Carbon\Carbon::now())->latest('id', 'desc')->sum('final_amount');
+        $data->primary = DB::select("SELECT SUM(final_amount) AS final_amount FROM `orders_distributors` WHERE date(created_at) = '".date('Y-m-d')."'");
+        // $data->secondary = OrderProduct::where('created_at', '>', \Carbon\Carbon::now())->sum('qty');
+        $data->secondary = DB::select("SELECT SUM(qty) AS qty FROM `order_products` WHERE date(created_at) = '".date('Y-m-d')."'");
 
-
-        $vp_states = DB::select('SELECT state FROM `retailer_list_of_occ`  GROUP BY state ORDER BY state');
-        if (!empty(request()->input('from'))) {
-            $from = request()->input('from');
-        } else {
-            $from = $first_day_this_month = date('Y-m-01');
-        }
-
-        // date to
-        if (!empty(request()->input('to'))) {
-            $to = date('Y-m-d', strtotime(request()->input('to'). '+1 days'));
-        } else {
-            $to = $current_day_this_month = date('Y-m-d', strtotime('+1 day'));
-        }
-
-
-
-             $stateWiseReport = DB::select('SELECT ro.state AS name , SUM(o.final_amount) AS value FROM `retailer_list_of_occ` AS ro
-            LEFT JOIN stores AS s ON ro.retailer = s.store_name
-            LEFT JOIN orders AS o ON s.id = o.store_id
-            GROUP BY ro.state ORDER BY ro.state' );
-
-                // $from = request()->input('from');
-                // $to = date('Y-m-d', strtotime(request()->input('to'). '+1 days'));
-
-                $regionWiseReport = \DB::select('SELECT ro.area, SUM(o.final_amount) AS value FROM `retailer_list_of_occ` AS ro
-                LEFT JOIN stores AS s ON ro.retailer = s.store_name
-                LEFT JOIN orders AS o ON s.id = o.store_id
-                WHERE ro.state = "'.request()->input('state').'"
-                AND (o.created_at BETWEEN "'.$from.'" AND "'.$to.'")
-                GROUP BY ro.area');
-
-                $RSMwiseReport = \DB::select('SELECT ro.rsm AS name, ro.state, SUM(o.final_amount) AS value FROM `retailer_list_of_occ` AS ro
-                LEFT JOIN stores AS s ON ro.retailer = s.store_name
-                LEFT JOIN orders AS o ON s.id = o.store_id
-                WHERE ro.state = "'.request()->input('state').'"
-                AND (o.created_at BETWEEN "'.$from.'" AND "'.$to.'")
-                GROUP BY ro.rsm');
-
-
-
-
-
-
-        return view('admin.home', compact('data','store','vp_states','stateWiseReport', 'regionWiseReport', 'RSMwiseReport', 'loggedInUser','activity','distributor'));
-
+        return view('admin.home', compact('data'));
     }
 
-     public function directory(Request $request)
+    public function directory(Request $request)
     {
         if (!empty($request->term)) {
-
-             $data = $this->distributorRepository->getSearchDirectorymom($request->term);
-
-
-         } else {
-         $data =  DirectoryMom::latest('id','desc')->paginate(5);
-         }
-
+            $data = $this->distributorRepository->getSearchDirectorymom($request->term);
+        } else {
+            $data =  DirectoryMom::latest('id','desc')->paginate(5);
+        }
 
         return view('admin.directorymom.index', compact('data'));
     }
