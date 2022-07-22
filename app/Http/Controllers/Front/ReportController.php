@@ -335,6 +335,7 @@ class ReportController extends Controller
 
             $retailers = DB::select("SELECT id, store_name FROM `stores`
             WHERE `user_id` = '".$loggedInUserId."'
+            AND status = 1
             ORDER BY store_name");
 
             // $retailers = DB::select("SELECT id, retailer FROM `retailer_list_of_occ`

@@ -38,7 +38,7 @@ class StoreRepository implements StoreInterface
      */
     public function viewStoreInFrontend()
     {
-        return Store::where('status', 1)->paginate(30);
+        return Store::where('status', 1)->orderBy('store_name')->paginate(30);
     }
 
      /**

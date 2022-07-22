@@ -551,7 +551,10 @@ class UserRepository implements UserInterface
             $data = DB::select('SELECT * FROM orders_distributors WHERE user_id = "' . $loggedInUserId . '" ORDER BY id DESC');
         } elseif ($loggedInUserType == 4) {
             // $data = Order::where('email', Auth::guard('web')->user()->email)->latest('id')->get();
-            $data = DB::select('SELECT * FROM orders WHERE email = "' . $loggedInUserEmail . '" OR user_id = "' . $loggedInUserId . '" ORDER BY id DESC');
+
+            // $data = DB::select('SELECT * FROM orders WHERE email = "' . $loggedInUserEmail . '" OR user_id = "' . $loggedInUserId . '" ORDER BY id DESC');
+
+            $data = Order::where('email', $loggedInUserEmail)->orWhere('user_id', $loggedInUserId)->orderBy('id', 'desc')->get();
         } elseif ($loggedInUserType == 3) {
             $data = DB::select('SELECT o.*, u.name AS ordered_by_username FROM retailer_list_of_occ AS ro INNER JOIN stores AS s ON ro.retailer = s.store_name INNER JOIN orders AS o ON s.id = o.store_id INNER JOIN users AS u ON o.user_id = u.id WHERE ro.asm LIKE "%' . $loggedInUser . '%" OR o.user_id = "' . $loggedInUserId . '" ORDER BY o.id DESC');
         } elseif ($loggedInUserType == 2) {
