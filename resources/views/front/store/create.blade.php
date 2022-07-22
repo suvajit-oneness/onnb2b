@@ -40,7 +40,7 @@
                                 </div>
                                 <div class="col-sm-4">
                                     <div class="form-group">
-                                        <label class="floating-label">Distributor Name *</label>
+                                        <label class="floating-label">Distributor *</label>
                                         <select class="form-control" name="distributor_name">
                                             <option value="" disabled selected>Select</option>
                                             @foreach ($distributor as $index => $item)

@@ -28,13 +28,13 @@
             @continue
         @endif
             <div class="col-lg-4 col-12 jQueryEqualHeight">
-                <div class="store_card card">
-                    <div class="store_card_body">
-                        <a href="{{ route('front.store.detail', [$categoryProductValue->id, 'type' => $type]) }}" class="product__single" data-events data-cat="tshirt">
+                <a href="{{ route('front.store.detail', [$categoryProductValue->id, 'type' => $type]) }}" class="">
+                    <div class="store_card card">
+                        <div class="store_card_body">
                             <figcaption>
                                 <h5>{{$categoryProductValue->store_name}}</h5>
                                 <ul>
-                                    <li><span class="storeId">#{{$categoryProductValue->store_OCC_number}}</span></li>
+                                    @if($categoryProductValue->store_OCC_number)<li><span class="storeId">#{{$categoryProductValue->store_OCC_number}}</span></li>@endif
                                     <li>{{$categoryProductValue->bussiness_name}}</li>
                                 </ul>
                                 <div class="storLoction">
@@ -45,17 +45,17 @@
                                         <h6 class="mb-1">{{$categoryProductValue->area}}</h6>
                                         <p class="text-muted mb-0">{{$categoryProductValue->state}}</p>
                                         @if (request()->is('order-on-call'))
-                                            <a href="tel:{{ $categoryProductValue->contact }}">
-												<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 feather feather-phone-call"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-												{{$categoryProductValue->contact}}
-											</a>
+                                            {{-- <a href="tel:{{ $categoryProductValue->contact }}"> --}}
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 feather feather-phone-call"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                                {{$categoryProductValue->contact}}
+                                            {{-- </a> --}}
                                         @endif
                                     </div>
                                 </div>
                             </figcaption>
-                        </a>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
             @empty
             here

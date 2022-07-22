@@ -41,7 +41,8 @@
                                                 <label for="dateTo" style="visibility: hidden;"><h5 class="small text-muted mb-0">Date to</h5></label>
                                                 <div class="btn-group" role="group" aria-label="Basic example">
                                                     <button type="submit" class="btn btn-sm btn-danger">Apply</button>
-                                                    <a type="button" href="{{ route('front.sales.report.detail.updated', ['ase' => request()->input('ase'), 'state' => request()->input('state')]) }}" class="btn btn-sm btn-light border" data-toggle="tooltip" data-placement="top" title="Remove filter">
+
+                                                    <a type="button" href="{{ url()->current() }}" class="btn btn-sm btn-light border" data-toggle="tooltip" data-placement="top" title="Remove filter">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x-circle"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
                                                     </a>
                                                 </div>
@@ -73,6 +74,7 @@
                                             </thead>
                                             <tbody>
                                                 @foreach ($distributors as $distributor)
+                                                @if ($distributor->distributor_name == null) @continue @endif
                                                     @php
                                                     if ( request()->input('from') || request()->input('to') ) {
                                                         // date from

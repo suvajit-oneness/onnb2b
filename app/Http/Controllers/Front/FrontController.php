@@ -96,12 +96,11 @@ class FrontController extends Controller
             WHERE vp LIKE "%'.$loggedInUser.'%"
             GROUP BY distributor_name');
         }
-          $item=$data[0];
-         //dd($data);
-        // $data = $this->storeRepository->listAll();
+
+        $item = $data[0];
 
         if ($data) {
-            return view('front.directory.index', compact('data','item'));
+            return view('front.directory.index', compact('data', 'item'));
         } else {
             return view('front.404');
         }
