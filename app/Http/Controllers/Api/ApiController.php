@@ -106,8 +106,141 @@ class ApiController extends Controller
         }
     }
 
+    // store create image API
+	public function storeCreateImage(Request $request) {
+		$validator = Validator::make($request->all(), [
+            'file' => ['required', 'image', 'max:1000000'],
+        ]);
+
+        if (!$validator->fails()) {
+			// if($request->file) {
+				$imageName = mt_rand().'.'.$request->file->extension();
+				$uploadPath = 'public/uploads/store';
+				$request->file->move($uploadPath, $imageName);
+				$total_path = $uploadPath.'/'.$imageName;
+			// }
+
+			return response()->json(['error' => false, 'message' => 'Image added', 'data' => $total_path]);
+		} else {
+            return response()->json(['error' => true, 'message' => $validator->errors()->first()]);
+        }
+	}
+
     //ase team report
-    public function detail(Request $request)
+    public function aseStoreOrders(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ase_id' => ['required'],
+            'date_from' => ['nullable'],
+            'date_to' => ['nullable'],
+            'collection' => ['nullable'],
+            'category' => ['nullable'],
+            'orderBy' => ['nullable'],
+            'style_no' => ['nullable'],
+        ]);
+
+        if (!$validator->fails()) {
+            $userName = User::findOrFail($request->ase_id);
+            $userName = $userName->name;
+
+            $distributors = DB::select("SELECT distributor_name FROM `retailer_list_of_occ`
+            WHERE ase LIKE '%".$userName."%'
+            GROUP BY distributor_name
+            ORDER BY distributor_name");
+
+            $retailers = DB::select("SELECT id, store_name FROM `stores`
+            WHERE `user_id` = '".$request->ase_id."'
+            ORDER BY store_name");
+
+            $distributorsResp = $retailerResp = $resp = [];
+
+            foreach($distributors as $distributor) {
+                $distributorsResp[] = [
+                    'distributor_name' => $distributor->distributor_name
+                ];
+            }
+
+            foreach($retailers as $retailer) {
+                if ( !empty($request->date_from) || !empty($request->date_to) ) {
+                    // date from
+                    if (!empty($request->date_from)) {
+                        $from = $request->date_from;
+                    } else {
+                        $from = date('Y-m-01');
+                    }
+
+                    // date to
+                    if (!empty($request->date_to)) {
+                        $to = date('Y-m-d', strtotime($request->date_to. '+1 day'));
+                    } else {
+                        $to = date('Y-m-d', strtotime('+1 day'));
+                    }
+
+                    // collection
+                    if ($request->collection == 'all' || !isset($request->collection)) {
+                        $collectionQuery = "";
+                    } else {
+                        $collectionQuery = " AND p.collection_id = ".$request->collection;
+                    }
+
+                    // category
+                    if ($request->category == 'all' || !isset($request->category)) {
+                        $categoryQuery = "";
+                    } else {
+                        $categoryQuery = " AND p.cat_id = ".$request->category;
+                    }
+
+                    // style no
+                    if (!isset($request->style_no)) {
+                        $styleNoQuery = "";
+                    } else {
+                        $styleNoQuery = " AND p.style_no LIKE '%".$request->style_no."%'";
+                    }
+
+                    // order by
+                    if ($request->orderBy == 'date_asc') {
+                        $orderByQuery = "op.id ASC";
+                    } elseif ($request->orderBy == 'qty_asc') {
+                        $orderByQuery = "qty ASC";
+                    } elseif ($request->orderBy == 'qty_desc') {
+                        $orderByQuery = "qty DESC";
+                    } else {
+                        $orderByQuery = "op.id DESC";
+                    }
+
+                    $report = DB::select("SELECT IFNULL(SUM(op.qty), 0) AS qty FROM `orders` AS o
+                    INNER JOIN order_products AS op ON op.order_id = o.id
+                    INNER JOIN products p ON p.id = op.product_id
+                    WHERE o.store_id = '".$retailer->id."'
+                    ".$collectionQuery."
+                    ".$categoryQuery."
+                    ".$styleNoQuery."
+                    AND (date(o.created_at) BETWEEN '".$from."' AND '".$to."')
+                    ORDER BY ".$orderByQuery);
+                } else {
+                    $report = DB::select("SELECT IFNULL(SUM(op.qty), 0) AS qty FROM `orders` AS o INNER JOIN order_products AS op ON op.order_id = o.id WHERE o.store_id = '".$retailer->id."' AND (date(o.created_at) BETWEEN '".date('Y-m-01')."' AND '".date('Y-m-d', strtotime('+1 day'))."')");
+                }
+
+                $retailerResp[] = [
+                    'store_id' => $retailer->id,
+                    'store_name' => $retailer->store_name,
+                    'quantity' => $report[0]->qty
+                ];
+            }
+
+            $resp[] = [
+                'primary_sales' => $distributorsResp,
+                'secondary_sales' => $retailerResp,
+            ];
+
+            return response()->json(['error' => false, 'message' => 'ASE report - Team wise', 'data' => $resp]);
+        } else {
+            return response()->json(['error' => true, 'message' => $validator->errors()->first()]);
+        }
+    }
+
+    //ase product report
+    public function aseProductOrders(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'ase_id' => ['required'],
@@ -199,24 +332,4 @@ class ApiController extends Controller
             return response()->json(['error' => true, 'message' => $validator->errors()->first()]);
         }
     }
-
-    // store create image API
-	public function storeCreateImage(Request $request) {
-		$validator = Validator::make($request->all(), [
-            'file' => ['required', 'image', 'max:1000000'],
-        ]);
-
-        if (!$validator->fails()) {
-			// if($request->file) {
-				$imageName = mt_rand().'.'.$request->file->extension();
-				$uploadPath = 'public/uploads/store';
-				$request->file->move($uploadPath, $imageName);
-				$total_path = $uploadPath.'/'.$imageName;
-			// }
-
-			return response()->json(['error' => false, 'message' => 'Image added', 'data' => $total_path]);
-		} else {
-            return response()->json(['error' => true, 'message' => $validator->errors()->first()]);
-        }
-	}
 }

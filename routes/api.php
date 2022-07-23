@@ -362,6 +362,6 @@ Route::get('collection/{collectionId}/category/{categoryId}', 'Api\CollectionCon
 Route::post('distributor/store/orders', 'Api\ApiController@distributorStoreReport');
 Route::post('store/create/image/upload', 'Api\ApiController@storeCreateImage');
 
-
 //ase team wise report
-Route::post('ase/store/orders', 'Api\ApiController@detail');
+Route::post('ase/store/orders', 'Api\ApiController@aseStoreOrders');
+Route::post('ase/product/orders', 'Api\ApiController@aseProductOrders');

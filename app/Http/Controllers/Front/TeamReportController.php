@@ -34,6 +34,6 @@ class TeamReportController extends Controller
             ORDER BY store_name");
         }
 
-        return view('front.report.ase.team-report.details', compact('distributors', 'retailers', 'collection', 'category', 'request'));
+        return view('front.report.ase.team-report.details', compact('distributors', 'retailers', 'collection', 'category', 'request', 'loggedInUserType'));
     }
 }

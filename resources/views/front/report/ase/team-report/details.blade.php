@@ -5,7 +5,11 @@
 @section('content')
 <div class="col-sm-12">
     <div class="profile-card">
-        <h3 class="mb-0">Team wise Report</h3>
+        @if ($loggedInUserType == 4)
+            <h3 class="mb-0">Store wise Report</h3>
+        @else
+            <h3 class="mb-0">Team wise Report</h3>
+        @endif
         <section class="store_listing">
             <div class="row">
                 <div class="col-12">
@@ -116,6 +120,7 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($distributors as $distributor)
+                                        @if($distributor->distributor_name == null) @continue @endif
                                         @php
                                         if ( request()->input('from') || request()->input('to') || request()->input('collection') ||request()->input('category') ||request()->input('product') ) {
                                             // date from
@@ -194,13 +199,13 @@
                         </div>
                         <div class="tab-pane fade show active" id="pills-past" role="tabpanel" aria-labelledby="pills-past-tab">
                             <div class="row">
-                                <div class="col-12">
+                                {{-- <div class="col-12">
                                     @if (request()->input('from') || request()->input('to'))
                                         <p class="text-dark">Retailer wise report from <strong>{{ date('j F, Y', strtotime(request()->input('from'))) }}</strong> - <strong>{{ date('j F, Y', strtotime(request()->input('to'))) }}</strong></p>
                                     @else
                                         <p class="text-dark">Retailer wise daily report of <strong>{{ date('01 F, Y') }}</strong> - <strong>{{ date('j F, Y') }}</strong></p>
                                     @endif
-                                </div>
+                                </div> --}}
 
                                 <table class="table table-sm">
                                     <thead>
