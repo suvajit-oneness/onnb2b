@@ -12,8 +12,8 @@ use App\Models\OrderProduct;
 
 class ApiController extends Controller
 {
-    public function distributorStoreReport(Request $request)
-    {
+    // distributor store orders
+    public function distributorStoreReport(Request $request) {
         $validator = Validator::make($request->all(), [
             'distributor_id' => ['required'],
             'date_from' => ['nullable'],
@@ -27,7 +27,7 @@ class ApiController extends Controller
             $userName = User::findOrFail($request->distributor_id);
             $userName = $userName->name;
 
-            if (isset($request->collection)) {
+            if (isset($request->collection) || isset($request->date_from) || isset($request->date_to) || isset($request->orderBy) || isset($request->style_no)) {
                 if ($request->collection == 'all' || !isset($request->collection)) {
                     $collectionQuery = "";
                 } else {
@@ -45,7 +45,7 @@ class ApiController extends Controller
                 }
                 //dd($request->style_no);
                 if (!isset($request->style_no)) {
-                    dd('here 1');
+                    // dd('here 1');
                     $styleNoQuery = "";
                 } else {
                   //  dd('here 2');
@@ -57,13 +57,12 @@ class ApiController extends Controller
                 INNER JOIN orders o ON o.id = op.order_id
                 INNER JOIN stores s ON s.id = o.store_id
                 WHERE s.bussiness_name LIKE '%".$userName."%'
-                AND (DATE(op.created_at) BETWEEN '".$request->from."' AND '".date('Y-m-d', strtotime($request->to.'+ 1 day'))."')
+                AND (DATE(op.created_at) BETWEEN '".$request->date_from."' AND '".date('Y-m-d', strtotime($request->date_to.'+ 1 day'))."')
                 ".$collectionQuery."
                 ".$styleNoQuery."
                 GROUP BY op.product_id
                 ORDER BY ".$orderByQuery);
             } else {
-                // dd('here');
                 $products = DB::select("SELECT op.product_name, op.product_id, p.style_no, SUM(op.qty) AS product_count FROM `order_products` op
                 INNER JOIN products p ON p.id = op.product_id
                 INNER JOIN orders o ON o.id = op.order_id
@@ -105,14 +104,7 @@ class ApiController extends Controller
         } else {
             return response()->json(['error' => true, 'message' => $validator->errors()->first()]);
         }
-
-        // return response()->json([
-        //     'error' => false,
-        //     'message' => 'Distributor wise report',
-        //     'data' => $id,
-        // ]);
     }
-
 
     //ase team report
     public function detail(Request $request)
@@ -135,17 +127,17 @@ class ApiController extends Controller
             $resp = [];
 
             foreach($retailers as $retailer) {
-                if ( !empty($request->from) || !empty($request->to) ) {
+                if ( !empty($request->date_from) || !empty($request->date_to) ) {
                     // date from
-                    if (!empty($request->from)) {
-                        $from = $request->from;
+                    if (!empty($request->date_from)) {
+                        $from = $request->date_from;
                     } else {
                         $from = date('Y-m-01');
                     }
 
                     // date to
-                    if (!empty($request->to)) {
-                        $to = date('Y-m-d', strtotime($request->to. '+1 day'));
+                    if (!empty($request->date_to)) {
+                        $to = date('Y-m-d', strtotime($request->date_to. '+1 day'));
                     } else {
                         $to = date('Y-m-d', strtotime('+1 day'));
                     }
@@ -165,9 +157,8 @@ class ApiController extends Controller
                     }
 
                     // style no
-                    if ($request->style_no == 'all' || !isset($request->style_no)) {
+                    if (!isset($request->style_no)) {
                         $styleNoQuery = "";
-
                     } else {
                         $styleNoQuery = " AND p.style_no LIKE '%".$request->style_no."%'";
                     }
@@ -209,6 +200,7 @@ class ApiController extends Controller
         }
     }
 
+    // store create image API
 	public function storeCreateImage(Request $request) {
 		$validator = Validator::make($request->all(), [
             'file' => ['required', 'image', 'max:1000000'],

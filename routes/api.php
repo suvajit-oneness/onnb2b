@@ -365,5 +365,3 @@ Route::post('store/create/image/upload', 'Api\ApiController@storeCreateImage');
 
 //ase team wise report
 Route::post('ase/store/orders', 'Api\ApiController@detail');
-
-
