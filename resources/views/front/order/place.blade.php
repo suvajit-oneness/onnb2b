@@ -310,7 +310,7 @@
                     </div>
 
                     <div class="w-100">
-                        <form action="{{ route('front.cart.add.bulk') }}" method="POST">@csrf
+                        <form action="{{ route('front.cart.add.bulk.distributor') }}" method="POST">@csrf
                             <h5>Select colors</h5>
                             <ul class="pl-0 pb-3 colors-container" style="list-style: none;">`;
 

@@ -103,13 +103,13 @@
                     <div class="tab-content" id="pills-tabContent">
                         <div class="tab-pane fade" id="pills-current" role="tabpanel" aria-labelledby="pills-current-tab">
                             <div class="row">
-                                <div class="col-12">
+                                {{-- <div class="col-12">
                                     @if (request()->input('from') || request()->input('to'))
                                         <p class="text-dark">Distributor wise report from <strong>{{ date('j F, Y', strtotime(request()->input('from'))) }}</strong> - <strong>{{ date('j F, Y', strtotime(request()->input('to'))) }}</strong></p>
                                     @else
                                         <p class="text-dark">Distributor wise daily report of <strong>{{date('j F, Y')}}</strong></p>
                                     @endif
-                                </div>
+                                </div> --}}
 
                                 <table class="table table-sm table-hover">
                                     <thead>
@@ -122,7 +122,6 @@
                                         @foreach ($distributors as $distributor)
                                         @if($distributor->distributor_name == null) @continue @endif
                                         @php
-                                        if ( request()->input('from') || request()->input('to') || request()->input('collection') ||request()->input('category') ||request()->input('product') ) {
                                             // date from
                                             if (!empty(request()->input('from'))) {
                                                 $from = request()->input('from');
@@ -136,41 +135,41 @@
                                             } else {
                                                 $to = $current_day_this_month = date('Y-m-d', strtotime('+1 day'));
                                             }
-                                            //collection
-                                            if (!empty(request()->input('collection'))) {
-                                                $collection = request()->input('collection');
+
+                                            // dd($request->all());
+
+                                            // collection
+                                            if (!isset($request->collection) || $request->collection == 'all') {
+                                                // dd('here 1');
+                                                $collectionQuery = "";
                                             } else {
-                                                $collection = request()->input('collection');
+                                                // dd('here 2');
+                                                $collectionQuery = " AND p.collection_id = ".$request->collection;
                                             }
 
-                                            //category
-                                            if (!empty(request()->input('category'))) {
-                                                $category = request()->input('category');
+                                            // category
+                                            if (!isset($request->category) || $request->category == 'all') {
+                                                $categoryQuery = "";
                                             } else {
-                                                $category = request()->input('category');
+                                                $categoryQuery = " AND p.cat_id = ".$request->category;
                                             }
 
-                                            //product
-                                            /* if (!empty(request()->input('product'))) {
-                                                $product = request()->input('product');
+                                            // style no
+                                            if(!empty($request->style_no)) {
+                                                $styleNoQuery = " AND p.style_no LIKE '%".$request->style_no."%'";
                                             } else {
-                                                $product = request()->input('product');
-                                            } */
+                                                $styleNoQuery = "";
+                                            }
 
-                                            $report = \DB::select("SELECT SUM(od.final_amount) AS amount, SUM(opd.qty) AS qty FROM `orders_distributors` AS od
-                                            INNER JOIN order_products_distributors AS opd
-                                            ON od.id = opd.order_id
-                                            LEFT JOIN products AS p
-                                            ON opd.product_id = p.id
-                                            WHERE od.distributor_name = '".$distributor->distributor_name."' AND (od.created_at BETWEEN '".$from."' AND '".$to."') AND (p.collection_id  = '".$collection."' ) AND (p.cat_id  = '".$category."' )");
-                                        } else {
-                                            $report = \DB::select("SELECT SUM(od.final_amount) AS amount, SUM(opd.qty) AS qty FROM `orders_distributors` AS od
-                                            INNER JOIN order_products_distributors AS opd
-                                            ON od.id = opd.order_id
-                                            LEFT JOIN products AS p
-                                            ON opd.product_id = p.id
-                                            WHERE od.distributor_name = '".$distributor->distributor_name."' AND DATE(od.created_at) = CURDATE() AND (p.collection_id  = '".$collection."' ) AND (p.cat_id  = '".$category."' )");
-                                        }
+                                            $report = DB::select("SELECT SUM(opd.qty) AS qty FROM `order_products_distributors` opd 
+                                            INNER JOIN orders_distributors od ON od.id = opd.order_id
+                                            INNER JOIN products p ON p.id = opd.product_id
+                                            WHERE od.user_id = ".$distributor->id."
+                                            ".$collectionQuery."
+                                            ".$categoryQuery."
+                                            ".$styleNoQuery."
+                                            AND (date(od.created_at) BETWEEN '".$from."' AND '".$to."') ");
+
                                         @endphp
                                             <tr>
                                                 <td>
@@ -188,7 +187,7 @@
                                                     </p> --}}
 
                                                     <p class="qty">
-                                                        {{  0 }}
+                                                        {{ $report[0]->qty == '' ? 0 : $report[0]->qty }}
                                                     </p>
                                                 </td>
                                             </tr>
@@ -216,6 +215,7 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($retailers as $retailer)
+                                        @if($retailer->store_name == null) @continue @endif
                                         @php
                                         if ( request()->input('from') || request()->input('to') ) {
                                             // date from
@@ -287,8 +287,8 @@
                                         @endphp
                                             <tr>
                                                 <td>
-                                                    <a href="{{ route('front.user.order') }}">
-                                                        {{ ($retailer->store_name == null) ? 'NA' : $retailer->store_name }}
+                                                    <a href="{{ route('front.user.order', ['store' => $retailer->id, 'name' => $retailer->store_name]) }}">
+                                                        {{ $retailer->store_name }}
                                                     </a>
                                                 </td>
                                                 <td>

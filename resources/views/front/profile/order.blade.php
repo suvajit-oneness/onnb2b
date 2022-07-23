@@ -8,7 +8,12 @@
         @if (Auth::guard('web')->user()->user_type != 4 && Auth::guard('web')->user()->user_type != 5)
             <h3>Order History for {{$orderValue->ordered_by_username}}</h3>
         @else
-            <h3>Order History</h3>
+            {{-- {{dd($data[0]->stores->store_name)}} --}}
+            @if (request()->input('name'))
+                <h3>Order History for {{request()->input('name')}}</h3>
+            @else
+                <h3>Order History</h3>
+            @endif
         @endif
 
         @if (request()->input('store'))

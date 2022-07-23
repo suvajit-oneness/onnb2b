@@ -319,43 +319,27 @@ Route::post('rsm-wise-distributor','Api\DistributorController@rsmDistributor');
 
 //login
 Route::post('login','Api\UserController@login');
-
-
 Route::post('user-login','Api\UserController@mobilelogin');
 
-
-
 //distributor mom create
-
 Route::post('distributor/mom/store', 'Api\DistributorController@momStore');
 
 //collection wise category
-
-
 Route::get('collection/{collectionId}/category', 'Api\CollectionController@categorylist');
 
-
 //ase sales report
-
 Route::post('ase/report', 'Api\DistributorController@aseSalesreport');
-
-
 
 //distributor order date wise
 Route::post('distributor/order/report', 'Api\DistributorController@distributorOrderReport');
 
-
 //store/retailer order date wise
 Route::post('retailer/order/report', 'Api\DistributorController@retailerOrderReport');
-
 Route::post('vp-complete-report', 'Api\ReportController@getVpCompleteReport');
-
-//collection -category wise product
-
-//collection wise category
-
-
 Route::get('collection/{collectionId}/category/{categoryId}', 'Api\CollectionController@collectionCategoryWiseProducts');
+
+
+
 
 
 // Suvajit APIs - 2022-07-20

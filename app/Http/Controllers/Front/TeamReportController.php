@@ -24,10 +24,11 @@ class TeamReportController extends Controller
         $loggedInUserState = Auth::guard('web')->user()->state;
 
         if ($loggedInUserType == 4) {
-            $distributors = DB::select("SELECT distributor_name FROM `retailer_list_of_occ`
-            WHERE ase LIKE '%".$loggedInUser."%'
-            GROUP BY distributor_name
-            ORDER BY distributor_name");
+            $distributors = DB::select("SELECT u.id, rlo.distributor_name FROM `retailer_list_of_occ` AS rlo 
+            INNER JOIN users u ON rlo.distributor_name = u.name
+            WHERE rlo.ase LIKE '%".$loggedInUser."%' 
+            GROUP BY rlo.distributor_name 
+            ORDER BY rlo.distributor_name");
 
             $retailers = DB::select("SELECT id, store_name FROM `stores`
             WHERE `user_id` = '".$loggedInUserId."'
